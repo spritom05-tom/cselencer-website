@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CSELencer</title>
+<style>
+:root{--bg1:#e6efff;--bg2:#ffffff;--ink:#0b1f44;--muted:#5b6b8c;--brand:#1d4ed8;--glass:rgba(255,255,255,.55);--glass-b:rgba(255,255,255,.9);--field:rgba(255,255,255,.8);--line:rgba(147,197,253,.6)}
+[data-theme=dark]{--bg1:#040918;--bg2:#0b1a3a;--ink:#e6eeff;--muted:#93a6cc;--brand:#60a5fa;--glass:rgba(20,35,70,.55);--glass-b:rgba(120,160,255,.2);--field:rgba(15,28,60,.75);--line:rgba(96,165,250,.35)}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);min-height:100vh;background:linear-gradient(120deg,var(--bg1),var(--bg2),var(--bg1));background-size:300% 300%;animation:bg 22s ease infinite;background-attachment:fixed;transition:color .4s}
+body::before,body::after{content:"";position:fixed;border-radius:50%;filter:blur(120px);opacity:.3;z-index:-1;width:560px;height:560px;pointer-events:none}
+body::before{background:#3b82f6;top:-200px;right:-150px}
+body::after{background:#38bdf8;bottom:-220px;left:-160px}
+@keyframes bg{0%,100%{background-position:0 50%}50%{background-position:100% 50%}}
+@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes shimmer{from{transform:translateX(-120%)}to{transform:translateX(120%)}}
+h1,h2,h3{margin:0 0 8px;letter-spacing:-.4px}
+p{margin:4px 0;line-height:1.55}
+.muted{color:var(--muted)}
+.wrap{max-width:1140px;margin:0 auto;padding:0 16px}
+.nav{position:sticky;top:10px;z-index:10;margin:10px auto 0;max-width:1140px;width:calc(100% - 20px);display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:22px;background:var(--glass);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border:1px solid var(--glass-b);box-shadow:0 18px 40px -18px rgba(30,64,175,.35)}
+.brand{font-weight:900;font-size:22px;background:linear-gradient(90deg,#1d4ed8,#38bdf8);-webkit-background-clip:text;background-clip:text;color:transparent;cursor:pointer}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.between{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center}
+.card{position:relative;overflow:hidden;background:var(--glass);backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%);border:1px solid var(--glass-b);border-radius:22px;padding:18px;margin-bottom:14px;box-shadow:0 22px 46px -22px rgba(30,64,175,.3);animation:up .5s cubic-bezier(.2,.8,.2,1) both;transition:transform .3s,box-shadow .3s}
+.card:hover{transform:translateY(-2px)}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
+.split{display:grid;gap:14px;grid-template-columns:1fr 1.1fr}
+button{font:inherit;font-weight:600;color:#fff;border:0;border-radius:13px;padding:9px 16px;cursor:pointer;background:linear-gradient(120deg,#1d4ed8,#3b82f6,#60a5fa,#1d4ed8);background-size:250% 100%;box-shadow:0 8px 20px -8px rgba(37,99,235,.6);transition:transform .2s,background-position .6s;position:relative;overflow:hidden}
+button:hover:not(:disabled){transform:translateY(-1px);background-position:100% 0}
+button:active:not(:disabled){transform:scale(.97)}
+button:disabled{opacity:.5;cursor:default}
+button::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.4) 50%,transparent 70%);transform:translateX(-120%)}
+button:hover:not(:disabled)::after{animation:shimmer .9s ease}
+button.ghost{background:var(--field);color:var(--brand);box-shadow:none;border:1px solid var(--line)}
+button.ok{background:linear-gradient(120deg,#0ea5e9,#2563eb)}
+button.warn{background:linear-gradient(120deg,#f59e0b,#d97706)}
+button.sm{padding:6px 11px;font-size:13px;border-radius:10px}
+input,select,textarea{width:100%;font:inherit;padding:10px 13px;border-radius:13px;border:1px solid var(--line);background:var(--field);color:var(--ink)}
+input:focus,select:focus,textarea:focus{outline:none;box-shadow:0 0 0 4px rgba(59,130,246,.22)}
+textarea{min-height:70px;resize:vertical}
+label.f{display:flex;flex-direction:column;gap:5px;margin-bottom:10px;font-size:13px;font-weight:600}
+.chip{display:inline-block;padding:3px 11px;border-radius:999px;font-size:12px;font-weight:600;background:rgba(59,130,246,.14);color:var(--brand);margin:2px 4px 2px 0}
+.badge{display:inline-block;padding:4px 11px;border-radius:999px;font-size:12px;font-weight:700;background:var(--field);color:var(--muted)}
+.badge.hot{background:rgba(59,130,246,.18);color:var(--brand)}
+.badge.warn{background:rgba(245,158,11,.18);color:#b45309}
+.badge.good{background:rgba(14,165,233,.2);color:#0369a1}
+.badge.bad{background:rgba(239,68,68,.15);color:#dc2626}
+.hero{text-align:center;padding:50px 8px 24px;animation:up .8s both}
+.hero h1{font-size:clamp(30px,6vw,56px);line-height:1.08;background:linear-gradient(120deg,var(--ink),#1d4ed8,#38bdf8,var(--ink));background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:bg 8s ease infinite}
+.hero p{max-width:620px;margin:12px auto 20px;font-size:17px}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
+.tabs button{background:transparent;color:var(--brand);box-shadow:none;border:1px solid var(--line)}
+.tabs button.on{background:linear-gradient(120deg,#1d4ed8,#3b82f6);color:#fff;border-color:transparent}
+.empty{text-align:center;color:var(--muted);padding:24px}
+.box{border-top:1px solid var(--line);padding:12px 0}
+.msgs{max-height:220px;overflow:auto;padding:8px;border-radius:14px;background:var(--field);margin:8px 0}
+.msg{margin:6px 0;padding:7px 11px;border-radius:12px;max-width:85%;font-size:14px;background:var(--glass-b)}
+.msg.me{margin-left:auto;background:linear-gradient(120deg,#1d4ed8,#3b82f6);color:#fff}
+.note{padding:10px 12px;border-radius:14px;background:var(--field);border-left:4px solid #38bdf8;font-size:14px}
+.avatar{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-weight:800;color:#fff;background:linear-gradient(135deg,#1d4ed8,#38bdf8);flex-shrink:0}
+.search-wrap{padding:12px 14px}
+.search{position:relative}
+.search input{padding-left:50px;border-radius:999px;height:46px}
+.search .ico{position:absolute;left:6px;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#1d4ed8,#38bdf8);color:#fff;font-size:14px}
+.ring{display:inline-flex;align-items:center;gap:8px;padding:5px 16px 5px 5px;border-radius:999px}
+.dot{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#1d4ed8,#38bdf8);color:#fff;font-size:15px;flex-shrink:0}
+.tabs button.on .dot{background:#fff;color:#1d4ed8}
+.orb{width:44px;height:44px;border-radius:50%;padding:0;display:grid;place-items:center;font-size:18px;background:var(--field);border:1px solid var(--line);box-shadow:none}
+@media (max-width:760px){.split{grid-template-columns:1fr}.nav{width:calc(100% - 14px);top:6px}.card{padding:14px;border-radius:18px}.grid{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.7/babel.min.js"></script>
+<script type="text/babel">
+const {useState,useEffect}=React;
+const KEY="csel-v2";
+const CATS=["Graphic Design","Web Development","IT Support","Data Analytics","Cyber Security","UI/UX Design"];
+const TITLES={"Graphic Design":["Logo design for a café","Social media post pack","Brochure for a clinic"],"Web Development":["React landing page","WordPress shop fix","Admin dashboard with charts"],"IT Support":["Office network setup","Laptop repair","Server backup config"],"Data Analytics":["Sales dashboard in Power BI","Excel cleaning and pivots","Customer churn analysis"],"Cyber Security":["Website vulnerability scan","Firewall rules review","Phishing awareness training"],"UI/UX Design":["Mobile app redesign","Fintech onboarding flow","SaaS design system"]};
+const uid=()=>Math.random().toString(36).slice(2,9);
+const clone=x=>JSON.parse(JSON.stringify(x));
+const nowOf=d=>Date.now()+(d.offset||0);
+const fmt=t=>new Date(t).toLocaleString([],{dateStyle:"medium",timeStyle:"short"});
+const left=ms=>{const s=Math.max(0,Math.floor(ms/1000));return Math.floor(s/3600)+"h "+String(Math.floor(s%3600/60)).padStart(2,"0")+"m "+String(s%60).padStart(2,"0")+"s"};
+const toLocalInput=t=>{const d=new Date(t-new Date(t).getTimezoneOffset()*60000);return d.toISOString().slice(0,16)};
+
+const JOBS=Array.from({length:56},(_,i)=>{const c=CATS[i%6];return{id:"j"+i,ownerId:"c1",title:TITLES[c][Math.floor(i/6)%3]+" #"+(i+1),category:c,type:i%2?"Onsite":"Remote",budget:150+((i*73)%850),desc:"Clear brief, milestone updates, and delivery within the agreed time.",status:"open"}});
+const SEED={
+  users:[
+    {id:"c1",role:"client",name:"Mahim Hasan",email:"mahim@demo.com",pass:"1234",company:"Mahim Studio"},
+    {id:"u1",role:"freelancer",name:"Pritom Saha",email:"pritom@demo.com",pass:"1234",category:"Web Development",title:"Full-Stack Developer",bio:"React and Node.js builds with clean code.",rate:25,cv:"pritom-cv.pdf"},
+    {id:"u2",role:"freelancer",name:"Nusrat Jahan",email:"nusrat@demo.com",pass:"1234",category:"UI/UX Design",title:"Product Designer",bio:"Mobile and web design, research to prototype.",rate:20,cv:"nusrat-cv.pdf"}
+  ],
+  projects:JOBS,proposals:[],chats:{},offset:0
+};
+const FN=["Rahim","Karim","Sabina","Tanvir","Ayesha","Farhan","Mim","Sakib","Nabila","Imran","Tasnim","Arif","Riya","Shafiq","Jannat","Hasib","Lamia","Nafis","Sadia","Tareq","Mitu","Rakib","Samia","Jubayer"];
+const LN=["Ahmed","Khan","Akter","Hossain","Islam","Rahman"];
+const SK={"Graphic Design":["Photoshop","Illustrator","Branding"],"Web Development":["React","Node.js","PostgreSQL"],"IT Support":["Networking","Windows Server","Helpdesk"],"Data Analytics":["Power BI","Python","SQL"],"Cyber Security":["Pen testing","Firewalls","OWASP"],"UI/UX Design":["Figma","User research","Prototyping"]};
+const PROFILES=FN.map((f,i)=>{const c=CATS[i%6];return{id:"f"+i,role:"freelancer",name:f+" "+LN[i%6],email:"f"+i+"@demo.com",pass:"1234",category:c,title:c+" specialist",bio:"Experienced in "+SK[c].join(", ")+". Reliable, communicative, and on time.",rate:12+(i*3)%35,cv:f.toLowerCase()+"-cv.pdf",skills:SK[c],rating:(4+((i*7)%10)/10).toFixed(1),done:3+(i*5)%40,samples:[{title:TITLES[c][0]},{title:TITLES[c][1]}]}});
+SEED.users.push(...PROFILES);
+const load=()=>{try{const r=localStorage.getItem(KEY);return r?JSON.parse(r):clone(SEED)}catch(e){return clone(SEED)}};
+const save=d=>{try{localStorage.setItem(KEY,JSON.stringify(d))}catch(e){}};
+
+// Escrow timers: viewing ends -> auto release; pause ends -> revision needed
+function normalize(d){
+  const t=nowOf(d);
+  d.proposals.forEach(p=>{const e=p.esc;if(!e)return;
+    if(e.state==="viewing"&&t>=e.end)e.state="released";
+    if(e.state==="paused"&&t>=e.pauseUntil)e.state="revision";
+  });
+  return d;
+}
+const ESC_LABEL={unfunded:["Awaiting deposit",""],funded:["In escrow","hot"],viewing:["Client reviewing","warn"],paused:["Payment paused","warn"],revision:["Revision needed","warn"],released:["Paid","good"]};
+const Esc=({s})=><span className={"badge "+(ESC_LABEL[s]||[])[1]}>{(ESC_LABEL[s]||[s])[0]}</span>;
+const PSTATUS={pending:["Pending",""],hired:["Hired","hot"],rejected:["Declined","bad"]};
+const PBadge=({s})=><span className={"badge "+PSTATUS[s][1]}>{PSTATUS[s][0]}</span>;
+
+function Chat({pid,me,db,update}){
+  const [text,setText]=useState("");const [job,setJob]=useState("");
+  const msgs=db.chats[pid]||[];
+  const offerable=me.role==="client"&&String(pid).startsWith("d:")?db.projects.filter(p=>p.ownerId===me.id&&p.status==="open"):[];
+  const sendOffer=()=>{const p=db.projects.find(x=>x.id===job);if(!p)return;update(d=>{(d.chats[pid]=d.chats[pid]||[]).push({from:me.id,text:"I'd like to offer you this job. Please review and accept.",offer:{pid:p.id,title:p.title,budget:p.budget},t:Date.now()});return d});setJob("")};
+  const acceptOffer=(i,m)=>update(d=>{if(!d.proposals.some(x=>x.projectId===m.offer.pid&&x.seekerId===me.id)){d.proposals.push({id:uid(),projectId:m.offer.pid,seekerId:me.id,bid:m.offer.budget,msg:"Accepted job offer",status:"hired",esc:{state:"unfunded"}});d.projects.find(x=>x.id===m.offer.pid).status="hired"}d.chats[pid][i].accepted=true;return d});
+  const send=()=>{if(!text.trim())return;update(d=>{(d.chats[pid]=d.chats[pid]||[]).push({from:me.id,text,t:Date.now()});return d});setText("")};
+  return <div>
+    <div className="msgs">{msgs.length===0&&<p className="muted" style={{fontSize:13}}>No messages yet. Say hello!</p>}
+      {msgs.map((m,i)=>m.offer?<div key={i} className="card" style={{padding:12,margin:"6px 0"}}><b>Job offer</b><p style={{fontSize:14}}>{m.text}</p><p className="muted" style={{fontSize:13}}>Job: {m.offer.title} · ${m.offer.budget}</p>{me.role==="freelancer"&&!m.accepted&&<button className="ok sm" onClick={()=>acceptOffer(i,m)}>Accept offer</button>}{m.accepted&&<span className="badge good">Accepted</span>}</div>:<div key={i} className={"msg"+(m.from===me.id?" me":"")}>{m.text}</div>)}</div>
+    {offerable.length>0&&<div className="row" style={{marginBottom:8}}><select style={{flex:1}} value={job} onChange={e=>setJob(e.target.value)}><option value="">Choose a job to offer</option>{offerable.map(p=><option key={p.id} value={p.id}>{p.title} (${p.budget})</option>)}</select><button className="ok sm" disabled={!job} onClick={sendOffer}>Send offer</button></div>}
+    <div className="row"><input style={{flex:1}} value={text} placeholder="Type a message" onChange={e=>setText(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()}/><button className="sm" onClick={send}>Send</button></div>
+  </div>;
+}
+
+function Auth({role,onLogin,onSignup,onBack}){
+  const [mode,setMode]=useState("login");
+  const [f,setF]=useState({name:"",email:"",pass:"",category:CATS[0],company:""});
+  const [err,setErr]=useState("");
+  const set=k=>e=>setF({...f,[k]:e.target.value});
+  const submit=e=>{e.preventDefault();setErr("");
+    if(mode==="login"){if(!onLogin(f.email.trim(),f.pass,role))setErr("Wrong email or password for this account type.")}
+    else{if(!f.name||!f.email||!f.pass)return setErr("Name, email and password are required.");if(!onSignup({...f,role}))setErr("This email already has an account.")}
+  };
+  return <div className="card" style={{maxWidth:460,margin:"30px auto"}}>
+    <button className="ghost sm" onClick={onBack}>← Back</button>
+    <h2 style={{marginTop:12}}>{mode==="login"?"Welcome back":"Create account"}</h2>
+    <p className="muted">{role==="freelancer"?"Join as a freelancer":"Join as a client"}</p>
+    <div className="row" style={{margin:"12px 0"}}><button className={mode==="login"?"":"ghost"} onClick={()=>setMode("login")}>Log in</button><button className={mode==="signup"?"":"ghost"} onClick={()=>setMode("signup")}>Sign up</button></div>
+    <form onSubmit={submit}>
+      {mode==="signup"&&<>
+        <label className="f"><span>Full name</span><input value={f.name} onChange={set("name")}/></label>
+        {role==="freelancer"&&<label className="f"><span>Category</span><select value={f.category} onChange={set("category")}>{CATS.map(c=><option key={c}>{c}</option>)}</select></label>}
+        {role==="client"&&<label className="f"><span>Company</span><input value={f.company} onChange={set("company")}/></label>}
+      </>}
+      <label className="f"><span>Email</span><input type="email" value={f.email} onChange={set("email")}/></label>
+      <label className="f"><span>Password</span><input type="password" value={f.pass} onChange={set("pass")}/></label>
+      {err&&<p style={{color:"#dc2626"}}>{err}</p>}
+      <button type="submit" style={{width:"100%"}}>{mode==="login"?"Log in":"Create account"}</button>
+    </form>
+    <p className="muted" style={{fontSize:13,marginTop:12}}>Demo: pritom@demo.com (freelancer) · mahim@demo.com (client) · password 1234</p>
+  </div>;
+}
+
+function FindJobs({me,db,update,q}){
+  const [sector,setSector]=useState("All");const [cat,setCat]=useState("All");
+  const [open,setOpen]=useState(null);const [bid,setBid]=useState("");const [cover,setCover]=useState("");
+  const list=db.projects.filter(p=>p.status==="open"&&(sector==="All"||p.type===sector)&&(cat==="All"||p.category===cat)&&matchQ(q,[p.title,p.category,p.desc,p.type]));
+  const mine=pid=>db.proposals.find(x=>x.projectId===pid&&x.seekerId===me.id);
+  const apply=p=>{update(d=>{d.proposals.push({id:uid(),projectId:p.id,seekerId:me.id,bid:Number(bid),msg:cover,status:"pending",esc:null});return d});setOpen(null);setBid("");setCover("")};
+  return <div>
+    <div className="card row"><select style={{maxWidth:200}} value={sector} onChange={e=>setSector(e.target.value)}><option>All</option><option>Remote</option><option>Onsite</option></select><select style={{maxWidth:240}} value={cat} onChange={e=>setCat(e.target.value)}><option>All</option>{CATS.map(c=><option key={c}>{c}</option>)}</select><span className="muted">{list.length} jobs</span></div>
+    <div className="grid">{list.map(p=><div className="card" key={p.id}>
+      <div className="between"><h3 style={{fontSize:16}}>{p.title}</h3><span className="chip">{p.type}</span></div>
+      <p className="muted">{p.category} · Budget ${p.budget}</p>
+      <p style={{fontSize:14}}>{p.desc}</p>
+      {mine(p.id)?<span className="badge hot">Proposal sent</span>:open===p.id?<div>
+        <label className="f"><span>Your bid (USD)</span><input type="number" value={bid} onChange={e=>setBid(e.target.value)}/></label>
+        <label className="f"><span>Cover note</span><textarea value={cover} onChange={e=>setCover(e.target.value)}/></label>
+        <div className="row"><button disabled={!bid} onClick={()=>apply(p)}>Send proposal</button><button className="ghost sm" onClick={()=>setOpen(null)}>Cancel</button></div>
+      </div>:<button onClick={()=>setOpen(p.id)}>Apply</button>}
+    </div>)}</div>
+  </div>;
+}
+
+function MyContracts({me,db,update}){
+  const mine=db.proposals.filter(x=>x.seekerId===me.id);
+  const [chat,setChat]=useState(null);
+  const [f,setF]=useState({});
+  const t=nowOf(db);
+  const submit=(pid)=>{const v=f[pid]||{};if(!v.file)return;const start=v.start?new Date(v.start).getTime():t;const mins=Math.min(60,Math.max(5,Number(v.mins)||5));
+    update(d=>{const p=d.proposals.find(x=>x.id===pid);p.esc={...p.esc,state:"viewing",file:v.file,start,end:start+mins*60000};return d})};
+  if(!mine.length)return <div className="empty">No proposals yet. Browse Find Jobs to apply.</div>;
+  return <div className="grid">{mine.map(pr=>{const p=db.projects.find(x=>x.id===pr.projectId);const e=pr.esc;const v=f[pr.id]||{};
+    return <div className="card" key={pr.id}>
+      <div className="between"><h3 style={{fontSize:16}}>{p.title}</h3><PBadge s={pr.status}/></div>
+      <p className="muted">Your bid: ${pr.bid}</p>
+      {pr.status==="hired"&&e&&<div className="row" style={{margin:"8px 0"}}><span>Escrow:</span><Esc s={e.state}/></div>}
+      {pr.status==="hired"&&e&&(e.state==="funded"||e.state==="revision")&&<div className="box">
+        <p style={{fontWeight:600}}>{e.state==="revision"?"Client paused. Upload revised work to restart review.":"Upload your work and set when the client can view it."}</p>
+        <label className="f"><span>Work file name (demo)</span><input value={v.file||""} placeholder="e.g. final-project.zip" onChange={ev=>setF({...f,[pr.id]:{...v,file:ev.target.value}})}/></label>
+        <label className="f"><span>Viewable from</span><input type="datetime-local" value={v.start||toLocalInput(t+300000)} onChange={ev=>setF({...f,[pr.id]:{...v,start:ev.target.value}})}/></label>
+        <label className="f"><span>Viewing time (5–60 min)</span><select value={v.mins||5} onChange={ev=>setF({...f,[pr.id]:{...v,mins:ev.target.value}})}>{[5,10,15,20,30,45,60].map(m=><option key={m} value={m}>{m} min</option>)}</select></label>
+        <button onClick={()=>submit(pr.id)}>Submit work</button>
+      </div>}
+      {pr.status==="hired"&&e&&e.state==="viewing"&&<div className="note" style={{marginTop:8}}>File: {e.file}<br/>Client can view from {fmt(e.start)} for {Math.round((e.end-e.start)/60000)} min. Auto-releases at {fmt(e.end)} if not released earlier.<br/>Time left: {left(e.end-t)}</div>}
+      {pr.status==="hired"&&e&&e.state==="paused"&&<p className="muted" style={{marginTop:8}}>Paused until {fmt(e.pauseUntil)}. You will be asked to revise after that.</p>}
+      {pr.status==="hired"&&e&&e.state==="released"&&<p style={{color:"#0284c7",fontWeight:700,marginTop:8}}>Payment released: ${pr.bid}</p>}
+      <button className="ghost sm" style={{marginTop:8}} onClick={()=>setChat(chat===pr.id?null:pr.id)}>{chat===pr.id?"Hide chat":"Chat with client"}</button>
+      {chat===pr.id&&<Chat pid={pr.id} me={me} db={db} update={update}/>}
+    </div>})}</div>;
+}
+
+function Profile({me,update}){
+  const [f,setF]=useState({name:me.name,title:me.title||"",bio:me.bio||"",rate:me.rate||0,cv:me.cv||""});
+  const [saved,setSaved]=useState(false);
+  const save_=()=>{update(d=>{Object.assign(d.users.find(u=>u.id===me.id),{...f,rate:Number(f.rate)||0});return d});setSaved(true);setTimeout(()=>setSaved(false),1500)};
+  return <div className="card" style={{maxWidth:620}}>
+    <h2>My profile</h2>
+    <label className="f"><span>Name</span><input value={f.name} onChange={e=>setF({...f,name:e.target.value})}/></label>
+    <label className="f"><span>Headline</span><input value={f.title} onChange={e=>setF({...f,title:e.target.value})}/></label>
+    <label className="f"><span>About</span><textarea value={f.bio} onChange={e=>setF({...f,bio:e.target.value})}/></label>
+    <label className="f"><span>Rate (USD/hr)</span><input type="number" value={f.rate} onChange={e=>setF({...f,rate:e.target.value})}/></label>
+    <label className="f"><span>CV (demo: stores file name)</span><input type="file" accept=".pdf,.doc,.docx" onChange={e=>e.target.files[0]&&setF({...f,cv:e.target.files[0].name})}/></label>
+    <div className="row"><button onClick={save_}>Save</button>{saved&&<span style={{fontWeight:600,color:"#0ea5e9"}}>Saved ✓</span>}</div>
+  </div>;
+}
+
+function Proposals({me,db,update,onPay}){
+  const [chat,setChat]=useState(null);
+  const mine=db.projects.filter(p=>p.ownerId===me.id);
+  const list=db.proposals.filter(x=>mine.some(p=>p.id===x.projectId));
+  const hire=pr=>update(d=>{d.proposals.forEach(x=>{if(x.projectId===pr.projectId)x.status=x.id===pr.id?"hired":"rejected"});const pp=d.projects.find(x=>x.id===pr.projectId);pp.status="hired";d.proposals.find(x=>x.id===pr.id).esc={state:"unfunded"};return d});
+  const deposit=id=>update(d=>{d.proposals.find(x=>x.id===id).esc.state="funded";return d});
+  if(!list.length)return <div className="empty">No proposals yet. Freelancers will show up here.</div>;
+  return <div className="card" style={{overflow:"auto"}}>
+    <h3>Proposals database</h3>
+    {list.map(pr=>{const p=mine.find(x=>x.id===pr.projectId);const s=db.users.find(u=>u.id===pr.seekerId);return <div className="box" key={pr.id}>
+      <div className="between"><div><b>{s.name}</b> <span className="chip">{s.category}</span><div className="muted" style={{fontSize:13}}>{p.title} · Bid ${pr.bid}</div><div style={{fontSize:14}}>{pr.msg}</div></div>
+        <div className="row"><PBadge s={pr.status}/>{pr.status==="pending"&&p.status==="open"&&<button className="ok sm" onClick={()=>hire(pr)}>Make offer / Hire</button>}
+        {pr.status==="hired"&&pr.esc&&pr.esc.state==="unfunded"&&<button className="sm" onClick={()=>onPay(pr.id)}>Pay into escrow</button>}
+        {pr.esc&&<Esc s={pr.esc.state}/>}</div></div>
+      <button className="ghost sm" style={{marginTop:8}} onClick={()=>setChat(chat===pr.id?null:pr.id)}>{chat===pr.id?"Hide chat":"Chat"}</button>
+      {chat===pr.id&&<Chat pid={pr.id} me={me} db={db} update={update}/>}
+    </div>})}
+  </div>;
+}
+
+function Contracts({me,db,update}){
+  const t=nowOf(db);const [pz,setPz]=useState({});
+  const list=db.proposals.filter(pr=>pr.esc&&db.projects.find(p=>p.id===pr.projectId&&p.ownerId===me.id));
+  const act=(id,fn)=>update(d=>{fn(d.proposals.find(x=>x.id===id));return d});
+  const release=id=>act(id,p=>{p.esc.state="released"});
+  const pause=(id,hrs)=>act(id,p=>{const used=p.esc.used6;let h=used?Math.min(72,Math.max(3,Number(hrs)||3)):6;p.esc.used6=true;p.esc.state="paused";p.esc.pauseUntil=nowOf(db)+h*3600000});
+  if(!list.length)return <div className="empty">No active contracts. Fund a hire first.</div>;
+  return <div className="grid">{list.map(pr=>{const p=db.projects.find(x=>x.id===pr.projectId);const s=db.users.find(u=>u.id===pr.seekerId);const e=pr.esc;const h=pz[pr.id]||"";
+    return <div className="card" key={pr.id}>
+      <div className="between"><h3 style={{fontSize:16}}>{p.title}</h3><Esc s={e.state}/></div>
+      <p className="muted">Freelancer: {s.name} · ${pr.bid}</p>
+      {e.state==="unfunded"&&<p className="muted">Deposit the amount to start.</p>}
+      {e.state==="funded"&&<p className="muted">Funded. Waiting for the freelancer to submit work.</p>}
+      {e.state==="viewing"&&<div className="note">File: <b>{e.file}</b><br/>Viewable {fmt(e.start)} to {fmt(e.end)}<br/>Auto-release in {left(e.end-t)}
+        <div className="row" style={{marginTop:10}}>
+          <button className="ok sm" onClick={()=>release(pr.id)}>Approve & release</button>
+          {!e.used6&&<button className="warn sm" onClick={()=>pause(pr.id)}>Pause 6h (once)</button>}
+          {e.used6&&<><input type="number" min="3" max="72" placeholder="3–72 h" style={{width:110}} value={h} onChange={ev=>setPz({...pz,[pr.id]:ev.target.value})}/><button className="warn sm" onClick={()=>pause(pr.id,h)}>Pause</button></>}
+        </div></div>}
+      {e.state==="paused"&&<p className="muted">Paused until {fmt(e.pauseUntil)} ({left(e.pauseUntil-t)} left). Then freelancer must revise.</p>}
+      {e.state==="revision"&&<p className="muted">Waiting for the freelancer's revised work.</p>}
+      {e.state==="released"&&<p style={{color:"#0284c7",fontWeight:700}}>Paid ${pr.bid}{e.autoReleased?" (auto-released)":""}</p>}
+    </div>})}</div>;
+}
+
+function PostJob({me,update}){
+  const blank={title:"",category:CATS[0],type:"Remote",budget:"",desc:""};
+  const [f,setF]=useState(blank);const [ok,setOk]=useState(false);
+  const set=k=>e=>setF({...f,[k]:e.target.value});
+  const post=()=>{if(!f.title||!f.budget)return;update(d=>{d.projects.push({id:uid(),ownerId:me.id,...f,budget:Number(f.budget),status:"open"});return d});setF(blank);setOk(true);setTimeout(()=>setOk(false),1800)};
+  return <div className="card" style={{maxWidth:620}}>
+    <h2>Post a job</h2>
+    <label className="f"><span>Title</span><input value={f.title} onChange={set("title")}/></label>
+    <div className="row"><label className="f" style={{flex:1}}><span>Category</span><select value={f.category} onChange={set("category")}>{CATS.map(c=><option key={c}>{c}</option>)}</select></label><label className="f" style={{flex:1}}><span>Work type</span><select value={f.type} onChange={set("type")}><option>Remote</option><option>Onsite</option></select></label></div>
+    <label className="f"><span>Budget (USD)</span><input type="number" value={f.budget} onChange={set("budget")}/></label>
+    <label className="f"><span>Description</span><textarea value={f.desc} onChange={set("desc")}/></label>
+    <div className="row"><button onClick={post}>Publish</button>{ok&&<span style={{fontWeight:600,color:"#0ea5e9"}}>Published ✓</span>}</div>
+  </div>;
+}
+
+const STEPS=["Hired","Deposit","Work submitted","Client review","Paid"];
+const stageOf=s=>({unfunded:1,funded:2,revision:2,viewing:3,paused:3,released:5})[s]||0;
+function Stepper({s}){const n=stageOf(s);return <div className="row" style={{gap:6,margin:"8px 0"}}>{STEPS.map((x,i)=><span key={x} className="chip" style={{opacity:i<n?1:.4}}>{i<n?"✓ ":""}{x}</span>)}</div>}
+
+function Talent({me,db,update,q}){
+  const [cat,setCat]=useState("All");const [open,setOpen]=useState(null);const [chatWith,setChatWith]=useState(null);
+  const list=db.users.filter(u=>u.role==="freelancer"&&(cat==="All"||u.category===cat)&&matchQ(q,[u.name,u.title,u.category,u.bio,(u.skills||[]).join(" ")]));
+  return <div>
+    <div className="card row"><select style={{maxWidth:260}} value={cat} onChange={e=>setCat(e.target.value)}><option>All</option>{CATS.map(c=><option key={c}>{c}</option>)}</select><span className="muted">{list.length} freelancers</span></div>
+    {q&&<h3 style={{marginTop:6}}>Matching jobs</h3>}
+    {q&&<div className="grid">{db.projects.filter(p=>matchQ(q,[p.title,p.category,p.desc,p.type])).map(p=><div className="card" key={p.id}><div className="between"><h3 style={{fontSize:16}}>{p.title}</h3><span className="chip">{p.type}</span></div><p className="muted">{p.category} · ${p.budget} · {p.status}</p></div>)}</div>}
+    <div className="grid">{list.map(s=><div className="card" key={s.id}>
+      <div className="row"><div className="avatar">{s.name.split(" ").map(w=>w[0]).join("").slice(0,2)}</div><div><h3 style={{fontSize:16,marginBottom:0}}>{s.name}</h3><span className="muted" style={{fontSize:13}}>{s.title}</span></div></div>
+      <div style={{margin:"8px 0"}}><span className="chip">{s.category}</span><span className="chip">★ {s.rating}</span><span className="chip">{s.done} jobs done</span></div>
+      <p className="muted" style={{fontSize:14}}>${s.rate}/hr</p>
+      {open===s.id&&<div className="box"><p style={{fontSize:14}}>{s.bio}</p><div>{(s.skills||[]).map(k=><span className="chip" key={k}>{k}</span>)}</div><p className="muted" style={{fontSize:13,marginTop:8}}>Portfolio</p>{(s.samples||[]).map((x,i)=><p key={i} style={{fontSize:14}}>▸ {x.title}</p>)}<p className="muted" style={{fontSize:13}}>CV: {s.cv||"not uploaded"}</p></div>}
+      <button className="ghost sm" onClick={()=>setOpen(open===s.id?null:s.id)}>{open===s.id?"Hide profile":"View profile"}</button>
+      <button className="sm" style={{marginLeft:6}} onClick={()=>setChatWith(chatWith===s.id?null:s.id)}>{chatWith===s.id?"Close chat":"Message"}</button>
+      {chatWith===s.id&&<Chat pid={"d:"+me.id+":"+s.id} me={me} db={db} update={update}/>}
+    </div>)}</div>
+  </div>;
+}
+
+function Orders({me,db}){
+  const mine=me.role==="freelancer"?db.proposals.filter(x=>x.seekerId===me.id&&x.status==="hired"):db.proposals.filter(x=>x.status==="hired"&&db.projects.some(p=>p.id===x.projectId&&p.ownerId===me.id));
+  if(!mine.length)return <div className="empty">No work orders yet. Hire a freelancer to create one.</div>;
+  return <div className="grid">{mine.map(pr=>{const p=db.projects.find(x=>x.id===pr.projectId);const s=db.users.find(u=>u.id===pr.seekerId);const c=db.users.find(u=>u.id===p.ownerId);const st=pr.esc?pr.esc.state:"unfunded";
+    return <div className="card" key={pr.id}>
+      <div className="between"><h3 style={{fontSize:16}}>Order #{pr.id.slice(0,6).toUpperCase()}</h3><span className="chip">{p.type}</span></div>
+      <p><b>{p.title}</b></p>
+      <p className="muted" style={{fontSize:13}}>Client: {c.company||c.name} · Freelancer: {s.name}</p>
+      <p style={{fontSize:14}}>Scope: {p.desc}</p>
+      <p><b>Agreed amount:</b> ${pr.bid}</p>
+      <Stepper s={st}/>
+      <Esc s={st}/>
+    </div>})}</div>;
+}
+
+function Payments({me,db}){
+  const mine=(me.role==="freelancer"?db.proposals.filter(x=>x.seekerId===me.id):db.proposals.filter(x=>db.projects.some(p=>p.id===x.projectId&&p.ownerId===me.id))).filter(x=>x.esc);
+  const sum=st=>mine.filter(x=>st.includes(x.esc.state)).reduce((a,x)=>a+Number(x.bid),0);
+  return <div>
+    <div className="grid"><div className="card"><p className="muted">In escrow</p><h2>${sum(["funded","viewing","paused","revision"])}</h2></div><div className="card"><p className="muted">Released</p><h2>${sum(["released"])}</h2></div></div>
+    <div className="card"><h3>Payment process</h3><ol style={{lineHeight:1.8,paddingLeft:20,margin:0}}><li>Client deposits the agreed amount into escrow.</li><li>Freelancer uploads work and sets a viewing window (5–60 min).</li><li>Client approves to release, or pauses (6 hours once, then 3–72 hours).</li><li>If the client does nothing, payment auto-releases when the window ends.</li><li>After a pause, the freelancer revises and the process repeats.</li></ol></div>
+    <div className="card"><h3>Receipts</h3>{(db.payments||[]).filter(x=>mine.some(m=>m.id===x.pid)).length===0&&<p className="muted">No receipts yet. Receipts appear after a successful payment.</p>}{(db.payments||[]).filter(x=>mine.some(m=>m.id===x.pid)).map(x=><div className="box between" key={x.id}><span>{x.id} · {x.method}</span><span><b>${x.amount}</b> · {fmt(x.t)}</span></div>)}</div>
+    <div className="card"><h3>Ledger</h3>{mine.length===0&&<p className="muted">No payments yet.</p>}{mine.map(pr=>{const p=db.projects.find(x=>x.id===pr.projectId);return <div className="box between" key={pr.id}><span>{p.title}</span><span><b>${pr.bid}</b> <Esc s={pr.esc.state}/></span></div>})}</div>
+  </div>;
+}
+
+function Reports({me,db,update}){
+  const [f,setF]=useState({target:"",reason:"Poor quality",details:""});
+  const [ok,setOk]=useState(false);
+  const others=db.users.filter(u=>u.id!==me.id);
+  const jobs=db.projects.filter(p=>p.ownerId===me.id||db.proposals.some(x=>x.projectId===p.id&&x.seekerId===me.id));
+  const mineR=(db.reports||[]).filter(r=>r.by===me.id);
+  const submit=()=>{if(!f.target||!f.details.trim())return;update(d=>{(d.reports=d.reports||[]).push({id:uid(),by:me.id,target:f.target,reason:f.reason,details:f.details,t:Date.now(),status:"Under review"});return d});setF({target:"",reason:"Poor quality",details:""});setOk(true);setTimeout(()=>setOk(false),1800)};
+  return <div className="split"><div className="card"><h3>Report a problem</h3>
+    <label className="f"><span>Who or what?</span><select value={f.target} onChange={e=>setF({...f,target:e.target.value})}><option value="">Select</option><optgroup label="People">{others.map(u=><option key={u.id} value={u.name}>{u.name}</option>)}</optgroup><optgroup label="Jobs">{jobs.map(p=><option key={p.id} value={p.title}>{p.title}</option>)}</optgroup></select></label>
+    <label className="f"><span>Reason</span><select value={f.reason} onChange={e=>setF({...f,reason:e.target.value})}>{["Poor quality","Late delivery","Non-payment","Harassment","Fraud or scam","Other"].map(r=><option key={r}>{r}</option>)}</select></label>
+    <label className="f"><span>Details</span><textarea value={f.details} onChange={e=>setF({...f,details:e.target.value})}/></label>
+    <div className="row"><button className="warn" onClick={submit}>Submit report</button>{ok&&<span style={{color:"#0ea5e9",fontWeight:600}}>Report sent ✓</span>}</div>
+  </div><div className="card"><h3>My reports</h3>{mineR.length===0&&<p className="muted">No reports yet.</p>}{mineR.map(r=><div className="box" key={r.id}><b>{r.target}</b> · {r.reason}<p className="muted" style={{fontSize:13}}>{fmt(r.t)} · {r.status}</p><p style={{fontSize:14}}>{r.details}</p></div>)}</div></div>;
+}
+
+const SYN={graphics:"graphic design",graphic:"graphic design",design:"design",web:"web development",development:"web development",develop:"web development",dev:"web development",developer:"web development",it:"it support",support:"it support",data:"data analytics",analytics:"data analytics",cyber:"cyber security",security:"cyber security",ui:"ui/ux design",ux:"ui/ux design",uiux:"ui/ux design",remote:"remote",onsite:"onsite"};
+const ICON={find:"🔎",orders:"📦",contracts:"🤝",payments:"💳",messages:"💬",profile:"👤",reports:"🚩",talent:"👥",proposals:"📨",post:"➕"};
+const matchQ=(q,fields)=>{const t=(q||"").toLowerCase().trim();if(!t)return true;const hay=fields.join(" ").toLowerCase();const words=hay.split(/[^a-z0-9]+/);return t.split(/\s+/).some(w=>words.some(x=>x===w||(w.length>=3&&x.startsWith(w)))||(SYN[w]&&hay.includes(SYN[w])))};
+function Messages({me,db,update}){
+  const [open,setOpen]=useState(null);
+  const threads=Object.keys(db.chats||{}).filter(k=>k.startsWith("d:")&&k.split(":").includes(me.id));
+  if(!threads.length)return <div className="empty">No messages yet. Clients can message freelancers from the Freelancers tab.</div>;
+  return <div className="grid">{threads.map(k=>{const parts=k.split(":");const o=db.users.find(u=>u.id===(parts[1]===me.id?parts[2]:parts[1]));const msgs=db.chats[k]||[];const last=msgs[msgs.length-1];
+    return <div className="card" key={k}><div className="between"><b>{o?o.name:"User"}</b><span className="muted" style={{fontSize:13}}>{msgs.length} messages</span></div><p className="muted" style={{fontSize:14}}>{last?(last.offer?"Job offer: "+last.offer.title:last.text):"No messages"}</p><button className="ghost sm" onClick={()=>setOpen(open===k?null:k)}>{open===k?"Close chat":"Open chat"}</button>{open===k&&<Chat pid={k} me={me} db={db} update={update}/>}</div>})}</div>;
+}
+
+function PayModal({pid,db,update,onClose}){
+  const pr=db.proposals.find(x=>x.id===pid);const p=db.projects.find(x=>x.id===pr.projectId);
+  const [method,setMethod]=useState("bKash");const [stage,setStage]=useState("form");const [txn,setTxn]=useState("");
+  const pay=()=>{setStage("processing");const id="TXN"+Math.random().toString(36).slice(2,10).toUpperCase();setTimeout(()=>{update(d=>{const q=d.proposals.find(x=>x.id===pid);q.esc.state="funded";(d.payments=d.payments||[]).push({id,pid,amount:q.bid,method,t:Date.now()});return d});setTxn(id);setStage("done")},1800)};
+  return <div onClick={stage==='processing'?undefined:onClose} style={{position:"fixed",inset:0,background:"rgba(5,12,30,.45)",backdropFilter:"blur(6px)",display:"grid",placeItems:"center",padding:16,zIndex:50}}>
+    <div className="card" onClick={e=>e.stopPropagation()} style={{maxWidth:440,width:"100%",margin:0}}>
+    {stage!=="done"?<>
+      <h3>Pay into escrow</h3>
+      <p className="muted">{p.title} · Order #{pid.slice(0,6).toUpperCase()}</p>
+      <h2>${pr.bid}</h2>
+      <div className="grid" style={{gridTemplateColumns:"repeat(3,1fr)",gap:8,margin:"12px 0"}}>{["bKash","Nagad","Card"].map(m=><button key={m} className={method===m?"":"ghost"} disabled={stage==="processing"} onClick={()=>setMethod(m)}>{m}</button>)}</div>
+      <label className="f"><span>Account or card (demo, any value)</span><input defaultValue="01XXXXXXXXX"/></label>
+      <p className="muted" style={{fontSize:13}}>Demo payment. No real money is charged. The amount is held in escrow until you approve.</p>
+      <div className="row" style={{justifyContent:"flex-end"}}><button className="ghost sm" disabled={stage==="processing"} onClick={onClose}>Cancel</button><button disabled={stage==="processing"} onClick={pay}>{stage==="processing"?"Processing…":"Pay $"+pr.bid}</button></div>
+    </>:<div style={{textAlign:"center"}}>
+      <div style={{fontSize:56}}>✅</div><h2>Payment successful</h2><p>${pr.bid} is now held in escrow.</p>
+      <div className="note" style={{textAlign:"left",marginTop:10}}>Transaction ID: <b>{txn}</b><br/>Method: {method}<br/>Time: {fmt(Date.now())}<br/>Status: In escrow</div>
+      <button style={{marginTop:14,width:"100%"}} onClick={onClose}>Done</button>
+    </div>}
+    </div>
+  </div>;
+}
+
+function Dashboard({me,db,update,onLogout}){
+  const fl=me.role==="freelancer";
+  const tabs=fl?[["find","Find Jobs"],["orders","Work Orders"],["contracts","My Contracts"],["payments","Payments"],["messages","Messages"],["profile","Profile"],["reports","Reports"]]:[["talent","Freelancers"],["messages","Messages"],["orders","Work Orders"],["proposals","Proposals"],["contracts","Contracts"],["payments","Payments"],["post","Post a Job"],["reports","Reports"]];
+  const [tab,setTab]=useState(tabs[0][0]);const [pay,setPay]=useState(null);const [q,setQ]=useState("");
+  return <div className="wrap" style={{paddingTop:22,paddingBottom:40}}>
+    <div className="between"><div><h2 style={{marginBottom:2}}>Hi, {me.name.split(" ")[0]}</h2><span className="muted">{fl?"Freelancer":"Client"} dashboard</span></div>
+      <div className="row"><button className="ghost sm" onClick={()=>update(d=>{d.offset=(d.offset||0)+3600000;return d})}>Demo: +1 hour</button><button className="ghost sm" onClick={onLogout}>Log out</button></div></div>
+    <div className="card search-wrap"><div className="search"><span className="ico">🔍</span><input value={q} onChange={e=>setQ(e.target.value)} placeholder={fl?"Search jobs: design, web, IT, data, remote…":"Search freelancers and jobs: design, web, IT, data…"}/></div>{q&&<p className="muted" style={{fontSize:13,margin:"10px 0 0"}}>Results for “{q}” <button className="ghost sm" style={{marginLeft:8}} onClick={()=>setQ("")}>Clear</button></p>}</div>
+    <div className="tabs">{tabs.map(([k,l])=><button key={k} className={"ring"+(tab===k?" on":"")} onClick={()=>setTab(k)}><span className="dot">{ICON[k]||"•"}</span>{l}</button>)}</div>
+    {fl&&tab==="find"&&<FindJobs me={me} db={db} update={update} q={q}/>}
+    {fl&&tab==="contracts"&&<MyContracts me={me} db={db} update={update}/>}
+    {fl&&tab==="profile"&&<Profile me={me} update={update}/>}
+    {fl&&tab==="orders"&&<Orders me={me} db={db}/>}
+    {fl&&tab==="payments"&&<Payments me={me} db={db}/>}
+    {fl&&tab==="reports"&&<Reports me={me} db={db} update={update}/>}
+    {fl&&tab==="messages"&&<Messages me={me} db={db} update={update}/>}
+    {!fl&&tab==="proposals"&&<Proposals me={me} db={db} update={update} onPay={setPay}/>}
+    {!fl&&tab==="contracts"&&<Contracts me={me} db={db} update={update}/>}
+    {!fl&&tab==="post"&&<PostJob me={me} update={update}/>}
+    {!fl&&tab==="talent"&&<Talent me={me} db={db} update={update} q={q}/>}
+    {!fl&&tab==="orders"&&<Orders me={me} db={db}/>}
+    {!fl&&tab==="payments"&&<Payments me={me} db={db}/>}
+    {!fl&&tab==="reports"&&<Reports me={me} db={db} update={update}/>}
+    {!fl&&tab==="messages"&&<Messages me={me} db={db} update={update}/>}
+    {pay&&<PayModal pid={pay} db={db} update={update} onClose={()=>setPay(null)}/>}
+  </div>;
+}
+
+function App(){
+  const [db,setDb]=useState(load);
+  const [uidNow,setUidNow]=useState(null);
+  const [view,setView]=useState("home");
+  const [role,setRole]=useState("freelancer");
+  const [theme,setTheme]=useState("light");
+  useEffect(()=>{document.documentElement.dataset.theme=theme},[theme]);
+  useEffect(()=>{const id=setInterval(()=>setDb(p=>{const n=normalize(clone(p));save(n);return n}),4000);return()=>clearInterval(id)},[]);
+  const update=fn=>setDb(p=>{const n=normalize(fn(clone(p)));save(n);return n});
+  const me=db.users.find(u=>u.id===uidNow);
+  const login=(email,pass,r)=>{const u=db.users.find(x=>x.email===email&&x.pass===pass&&x.role===r);if(!u)return false;setUidNow(u.id);return true};
+  const signup=f=>{if(db.users.some(u=>u.email===f.email))return false;const u={id:uid(),role:f.role,name:f.name,email:f.email,pass:f.pass,company:f.company,category:f.category,title:"",bio:"",rate:0,cv:""};update(d=>{d.users.push(u);return d});setUidNow(u.id);return true};
+  const goAuth=r=>{setRole(r);setView("auth")};
+  const themeBtn=<button className="orb" title="Toggle theme" onClick={()=>setTheme(theme==="light"?"dark":"light")}>{theme==="light"?"🌙":"☀️"}</button>;
+  const nav=<div className="nav"><div className="brand" onClick={()=>{setUidNow(null);setView("home")}}>CSELencer</div>
+    <div className="row">{themeBtn}{!me&&<><button className="ghost sm" onClick={()=>goAuth("freelancer")}>Find Work</button><button className="ghost sm" onClick={()=>goAuth("client")}>Hire</button><button className="sm" onClick={()=>goAuth("freelancer")}>Log in</button></>}{me&&<span className="muted" style={{fontSize:14}}>{me.name}</span>}</div></div>;
+  if(me)return <div>{nav}<Dashboard me={me} db={db} update={update} onLogout={()=>setUidNow(null)}/></div>;
+  const remote=db.projects.filter(p=>p.type==="Remote").length, onsite=db.projects.filter(p=>p.type==="Onsite").length;
+  return <div>{nav}<div className="wrap">
+    {view==="home"&&<>
+      <section className="hero">
+        <span className="chip">Remote & Onsite talent</span>
+        <h1>Hire talent. Get paid for work.<br/>Securely, with escrow.</h1>
+        <p>Freelancers apply to real jobs, chat with clients, and submit work. Clients review, approve, and payment releases automatically on time.</p>
+        <div className="row" style={{justifyContent:"center"}}><button onClick={()=>goAuth("client")}>Hire talent</button><button className="ghost" onClick={()=>goAuth("freelancer")}>Find work</button></div>
+      </section>
+      <div className="grid" style={{marginTop:20}}>
+        <div className="card" style={{cursor:"pointer"}} onClick={()=>goAuth("freelancer")}><h3>Remote jobs</h3><p className="muted">{remote} open jobs you can do from anywhere.</p><span className="badge hot">Browse remote</span></div>
+        <div className="card" style={{cursor:"pointer"}} onClick={()=>goAuth("freelancer")}><h3>Onsite jobs</h3><p className="muted">{onsite} open jobs on location.</p><span className="badge hot">Browse onsite</span></div>
+      </div>
+      <h2 style={{marginTop:24}}>Categories</h2>
+      <div className="grid">{CATS.map(c=><div className="card" key={c}><h3 style={{fontSize:16}}>{c}</h3><p className="muted">{db.projects.filter(p=>p.category===c).length} jobs</p></div>)}</div>
+      <div className="note" style={{margin:"26px auto",maxWidth:760}}>Prototype: data is saved in this browser only. Payments are simulated; no real money moves.</div>
+    </>}
+    {view==="auth"&&<Auth role={role} onLogin={login} onSignup={signup} onBack={()=>setView("home")}/>}
+  </div></div>;
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
